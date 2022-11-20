@@ -110,7 +110,7 @@ def start_date(date):
     
     start = search_date
 
-    # For a specified start, calculate TMIN, TAVG, and TMAX for all the dates greater than or equal to the start date.
+    # For a specified start date, calculate TMIN, TAVG, and TMAX for all the dates greater than or equal to the start date.
     start_query = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).all()
 
     session.close()
@@ -131,7 +131,7 @@ def start_end_date(start, end):
     end = end_date
 
     # For a specified start date and end date, calculate TMIN, TAVG, and TMAX for the dates from the start date to the end date, inclusive.
-    start_end_query = start_query = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    start_end_query = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
 
     session.close()
 
