@@ -44,7 +44,7 @@ def home():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/date<br/>"
+        f"/api/v1.0/start<br/>"
         f"/api/v1.0/start/end<br/>"
     )
 
@@ -90,7 +90,7 @@ def tobs():
     past_date_one_yr = dt.date(2017, 8, 23) - dt.timedelta(days=365)
     
     # Perform a query to retrieve the data and precipitation observations
-    prcp_scores_query = session.query(Measurement.tobs).filter(Measurement.date > past_date_one_yr).all()
+    prcp_scores_query = session.query(Measurement.date, Measurement.tobs).filter(Measurement.date > past_date_one_yr).all()
 
     session.close()
     
@@ -103,15 +103,17 @@ def tobs():
 
 """Return a JSON list of the minimum temperature, the average temperature, and the
     maximum temperature for a specified start or start-end range."""
-@app.route("/api/v1.0/<date>")
-def start_date(date):
+@app.route("/api/v1.0/<start>")
+def start_date(start):
     # create search for user input
-    search_date = dt.datetime.strptime(date, "%Y-%m-%d")
+    search_date = dt.datetime.strptime(start, "%Y-%m-%d")
+    last_year = dt.timedelta(days=365)
     
-    start = search_date
+    start = search_date - last_year
+    end = dt.date(2017, 8, 23)
 
     # For a specified start date, calculate TMIN, TAVG, and TMAX for all the dates greater than or equal to the start date.
-    start_query = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).all()
+    start_query = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
 
     session.close()
 
@@ -121,14 +123,16 @@ def start_date(date):
     return jsonify(json_start_query)
 
 
+
 @app.route("/api/v1.0/<start>/<end>")
 def start_end_date(start, end):
     # create search for user input
     start_date = dt.datetime.strptime(start, "%Y-%m-%d")
     end_date = dt.datetime.strptime(end, "%Y-%m-%d")
+    last_year = dt.timedelta(days=365)
 
-    start = start_date
-    end = end_date
+    start = start_date - last_year
+    end = end_date - last_year
 
     # For a specified start date and end date, calculate TMIN, TAVG, and TMAX for the dates from the start date to the end date, inclusive.
     start_end_query = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
